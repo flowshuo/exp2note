@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -45,7 +46,7 @@ public class AddContent extends AppCompatActivity {
         cv.put(NoteDb.TIME, getTime());
         cv.put(NoteDb.TITLE, mTitle.getText().toString());
         SharedPreferences prefs = getSharedPreferences("data", MODE_PRIVATE);
-        String names = prefs.getString("name","无名");
+        String names = prefs.getString("name", "无名");
         cv.put(NoteDb.AUTHOR, names);
         mSqldb.insert(NoteDb.TABLE_NAME, null, cv);
         finish();
@@ -57,7 +58,8 @@ public class AddContent extends AppCompatActivity {
         String str = sdf.format(date);
         return str;
     }
-    public void pic(View v){
+
+    public void pic(View v) {
         Intent intent;
         //添加图片的主要代码
         intent = new Intent();
@@ -68,17 +70,18 @@ public class AddContent extends AppCompatActivity {
         //选中相片后返回本Activity
         startActivityForResult(intent, 1);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK){
+        if (resultCode == RESULT_OK) {
             //取得数据
             Uri uri = data.getData();
             ContentResolver cr = this.getContentResolver();
             Bitmap bitmap = null;
             Bundle extras = null;
             //如果是选择照片
-            if(requestCode == 1){
+            if (requestCode == 1) {
 
                 try {
                     //将对象存入Bitmap中
@@ -96,24 +99,24 @@ public class AddContent extends AppCompatActivity {
 
             int imgWidth = bitmap.getWidth();
             int imgHeight = bitmap.getHeight();
-            double partion = imgWidth*1.0/imgHeight;
-            double sqrtLength = Math.sqrt(partion*partion + 1);
+            double partion = imgWidth * 1.0 / imgHeight;
+            double sqrtLength = Math.sqrt(partion * partion + 1);
             //新的缩略图大小
-            double newImgW = 480*(partion / sqrtLength);
-            double newImgH = 480*(1 / sqrtLength);
-            float scaleW = (float) (newImgW/imgWidth);
-            float scaleH = (float) (newImgH/imgHeight);
+            double newImgW = 480 * (partion / sqrtLength);
+            double newImgH = 480 * (1 / sqrtLength);
+            float scaleW = (float) (newImgW / imgWidth);
+            float scaleH = (float) (newImgH / imgHeight);
 
             Matrix mx = new Matrix();
             //对原图片进行缩放
             mx.postScale(scaleW, scaleH);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, imgWidth, imgHeight, mx, true);
-            final ImageSpan imageSpan = new ImageSpan(this,bitmap);
+            final ImageSpan imageSpan = new ImageSpan(this, bitmap);
 
 
-            Cursor cursor = mSqldb.query("image",null, null, null, null, null, null);
-            String picname = cursor.getCount()+"";
-            SpannableString spannableString = new SpannableString("[pic="+picname+"]");
+            Cursor cursor = mSqldb.query("image", null, null, null, null, null, null);
+            String picname = cursor.getCount() + "";
+            SpannableString spannableString = new SpannableString("[pic=" + picname + "]");
             spannableString.setSpan(imageSpan, 0, spannableString.length(), SpannableString.SPAN_MARK_MARK);
             //光标移到下一行
             mEt.append("\n");
